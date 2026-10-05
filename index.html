@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Choose function</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet"><style>
+/* Math notebook: graph-paper ground, navy fountain-pen ink, a yellow highlighter, a red correction pen.
+   Two typefaces: Atkinson Hyperlegible (text, built for young readers) and Kalam (the handwritten voice). */
+:root{
+  --paper:#FBFCFE; --sheet:#FFFFFF; --rule:#DCE5F2; --rule2:#C9D6EA;
+  --ink:#1C2A4A; --pencil:#5E6A82; --faint:#8E99AE;
+  --hl:#FFE45E; --hl-soft:#FFF4B8; --red:#C23A2E; --green:#1E7A50; --blue:#2D6BD0;
+  --p1:#2D6BD0; --p2:#D98A00; --p3:#7B4CC0; --p4:#1E7A50; --p5:#138A8A; --p6:#C2407A;
+  --console:#14223F; --console-ink:#DDE6F6;
+  --hand:"Kalam","Comic Neue","Segoe Print",cursive;
+  --text:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r-sm:5px; --r-md:9px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+body.reading{background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);
+  background-size:26px 26px;background-attachment:local}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:3px}
+h1,h2,h3{font-family:var(--hand);font-weight:700;line-height:1.15;color:var(--ink);margin:0 0 .4em}
+h1{font-size:2.5rem}
+h2{font-size:1.9rem}
+h3{font-size:1.4rem}
+.hl{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,transparent 92%)}
+button{font:inherit;cursor:pointer}
+.btn{border:1.5px solid var(--ink);background:var(--sheet);color:var(--ink);border-radius:var(--r-sm);padding:.35em .8em;font-size:.95rem}
+.btn:hover{background:var(--hl-soft)}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.primary:hover{background:#2B3E68}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.warn{border-color:var(--red);color:var(--red)}
+kbd{font-family:var(--text);border:1px solid var(--rule2);border-bottom-width:2px;border-radius:4px;padding:0 .3em;font-size:.85em}
+
+/* ---------- equations ---------- */
+.eq{font-size:1.35rem;text-align:center;padding:.7em .6em;margin:.2em 0 1em;border-left:4px solid var(--ink);
+  background:var(--sheet);display:flex;flex-wrap:wrap;gap:.35em;align-items:center;justify-content:center}
+.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 .15em}
+.frac>span:first-child{border-bottom:1.5px solid var(--ink);padding:0 .25em}
+.frac>span:last-child{padding:0 .25em}
+.binom{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;padding:0 .35em;position:relative;line-height:1.1}
+.binom::before,.binom::after{content:"";position:absolute;top:0;bottom:0;width:.35em;border:1.5px solid var(--ink)}
+.binom::before{left:0;border-right:none;border-radius:.6em 0 0 .6em}
+.binom::after{right:0;border-left:none;border-radius:0 .6em .6em 0}
+.eqnote{font-size:.85rem;color:var(--pencil)}
+
+/* ---------- SVG pictures ---------- */
+svg.pic{width:100%;height:auto;max-height:340px;display:block;margin:0 auto;font-family:var(--text);overflow:visible}
+.pic .t,.pic .cap{fill:var(--pencil);font-size:12px}
+.pic .vert{writing-mode:tb}
+.pic .chip{fill:#fff;stroke:var(--ink);stroke-width:1.3}
+.pic .chip.picked{fill:var(--hl);stroke:var(--ink)}
+.pic .chip.used{fill:#EEF1F6;stroke:#B6BECC}
+.pic .chip.banned{fill:#FBE9E7;stroke:var(--red)}
+.pic .chiptxt{fill:var(--ink);font-size:13px;font-weight:700}
+.pic .chiptxt.used{fill:#9AA4B5}
+.pic .strike{stroke-width:2;stroke-linecap:round}
+.pic .strike.used{stroke:#9AA4B5}
+.pic .strike.banned{stroke:var(--red)}
+.pic .strike.big{stroke-width:3.5;opacity:.85}
+.pic .sub{font-size:9px}
+.pic .chip.p1,.pic .tile.p1{fill:#E1ECFC;stroke:var(--p1)}
+.pic .chip.p2,.pic .tile.p2{fill:#FCEFD6;stroke:var(--p2)}
+.pic .chip.p3,.pic .tile.p3{fill:#ECE3F8;stroke:var(--p3)}
+.pic .chip.p4,.pic .tile.p4{fill:#DEF1E7;stroke:var(--p4)}
+.pic .chip.p5,.pic .tile.p5{fill:#DAF0F0;stroke:var(--p5)}
+.pic .chip.p6,.pic .tile.p6{fill:#F8E1EB;stroke:var(--p6)}
+.pic .tile{fill:#fff;stroke:var(--ink);stroke-width:1.4}
+.pic .tile.real{fill:var(--hl)}
+.pic .tilet{fill:var(--ink);font-size:16px;font-weight:700}
+.pic .tilet.sm{font-size:13px}
+.pic .slot{fill:#fff;stroke:var(--ink);stroke-width:1.6}
+.pic .result{fill:var(--hl);stroke:var(--ink);stroke-width:1.6}
+.pic .numbox{fill:#fff;stroke:var(--ink);stroke-width:1.2}
+.pic .slotlab{fill:var(--pencil);font-size:12px}
+.pic .slotn,.pic .calcn{fill:var(--ink);font-size:20px;font-weight:700}
+.pic .op{fill:var(--ink);font-size:22px;font-weight:700}
+.pic .op.big{font-size:30px}
+.pic .card{fill:#fff;stroke:var(--rule2)}
+.pic .arrow{stroke:var(--ink);stroke-width:2;fill:none}
+.pic .ahead{fill:var(--ink)}
+.pic .groupbox{fill:var(--hl-soft);stroke:var(--ink);stroke-width:1.6}
+.pic .groupt{fill:var(--ink);font-size:17px;font-weight:700}
+.pic .pg-cell{fill:#fff;stroke:var(--rule2);stroke-width:1}
+.pic .pg-cell.diag{fill:#FBE9E7}
+.pic .pg-cell.lower{fill:#EEF1F6}
+.pic .pg-cell.hl,.pic .pg-cell.twin-lit{fill:var(--hl);stroke:var(--ink)}
+.pic .pg-cell:hover{stroke:var(--ink);stroke-width:2}
+.pic .pgt{fill:var(--ink);pointer-events:none}
+.pic .pgt.dim{fill:#9AA4B5}
+.pic .gridlab{fill:var(--ink);font-size:13px;font-weight:700}
+.pic .edge{stroke:var(--pencil);stroke-width:1.3}
+.pic .tnode{fill:#fff;stroke:var(--rule2)}
+.pic .nodet{fill:var(--ink);font-size:12px;font-weight:700}
+.pic .node.root{fill:var(--ink)}
+.pic .rowhl{fill:var(--hl-soft)}
+.pic .brace{fill:none;stroke:var(--ink);stroke-width:1.6}
+.pic .seg{stroke:var(--faint);stroke-width:1.6}
+.pic .seg.hl{stroke:var(--blue);stroke-width:4;stroke-linecap:round;opacity:.85}
+.pic .seg.hl2{stroke:var(--p2);stroke-width:4;stroke-linecap:round;opacity:.8}
+.pic .dot{fill:var(--ink)}
+.pic .dotlab{fill:var(--ink);font-size:13px;font-weight:700}
+.pic .gl{stroke:var(--rule2);stroke-width:1.3}
+.pic .gl.hlv,.pic .gl.hlh{stroke:var(--blue);stroke-width:3.5}
+.pic .shade{fill:var(--hl);opacity:.6}
+.pic .path{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.pic .path.leg1{stroke:var(--blue)}
+.pic .path.leg2{stroke:var(--p2);stroke-dasharray:7 4}
+.pic .bag{fill:#F4F7FC;stroke:var(--ink);stroke-width:1.5}
+.pic .oval{fill:none;stroke:var(--hl);stroke-width:8;opacity:.9}
+.pic .oval.diff{stroke:#F2C2BC}
+.pic .lcell{fill:#fff;stroke:var(--rule2)}
+.pic .lcell.hl{fill:var(--hl)}
+.pic .lt{fill:var(--ink);font-size:13px;font-weight:700}
+.pic .wcard{fill:#fff;stroke:var(--ink);stroke-width:1.4}
+.pic .wcard.skip{fill:#F3F5F9;stroke:#B6BECC;stroke-dasharray:5 4}
+.pic .cardt{fill:var(--ink);font-size:15px}
+.pic .coin.gold{fill:#F7D774;stroke:#9A7400}
+.pic .coin.silver{fill:#E3E7EE;stroke:#7D8696}
+.pic .coint{fill:var(--ink);font-size:11px;font-weight:700}
+.pic .badring{fill:none;stroke:var(--red);stroke-width:2.5}
+.pic .state{fill:#fff;stroke:var(--rule2)}
+.pic .state.picked{fill:var(--hl-soft);stroke:var(--ink)}
+.pic .person{fill:var(--hl-soft);stroke:var(--ink)}
+.pic .persont{fill:var(--ink);font-weight:700;font-size:13px}
+.hstack{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;width:100%}
+.hstack>svg.pic{width:100%;flex:1 1 200px;min-width:0}
+.vstack{display:flex;flex-direction:column;gap:8px;align-items:center;width:100%}
+.vstack>svg.pic{width:100%}
+.ptable{border-collapse:collapse;margin:0 auto;font-size:.92rem;background:#fff}
+.ptable th,.ptable td{border:1px solid var(--rule2);padding:.25em .6em;text-align:center}
+.ptable th{background:#EEF3FA;font-weight:700}
+.ptable tr.hl td{background:var(--hl-soft);font-weight:700}
+
+/* ---------- story component ---------- */
+.story{container-type:inline-size;background:var(--sheet);border:1.5px solid var(--ink);border-radius:var(--r-md);padding:.8rem;margin:.6rem 0 1.2rem}
+.story:focus-visible{outline:3px solid var(--blue)}
+.story .frame{display:none;margin:0}
+.story .frame.on{display:block}
+.story.all .frame{display:block;border-bottom:1px dashed var(--rule2);padding-bottom:.8rem;margin-bottom:.8rem}
+.frame .pic-wrap{min-height:80px;display:flex;align-items:center;justify-content:center;overflow-x:auto}
+.frame figcaption{margin-top:.5rem}
+.frame figcaption p{margin:.2em 0}
+.frame .ftitle{font-family:var(--hand);font-size:1.15rem;margin:0 0 .3rem}
+.frame.skip .ftitle{text-decoration:line-through;color:var(--faint)}
+.frame.skip figcaption p{color:var(--pencil)}
+.ask{margin-top:.5rem;padding:.4rem .7rem;border-left:4px solid var(--hl);background:#FFFBE6;font-size:.95rem}
+.ask b{font-family:var(--hand)}
+.story-ctl{display:flex;align-items:center;gap:.6rem;margin-top:.6rem;flex-wrap:wrap}
+.dots{display:flex;gap:5px;flex-wrap:wrap}
+.dots button{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink);background:#fff;padding:0}
+.dots button.on{background:var(--ink)}
+.dots button.seen{background:var(--rule2)}
+.story-ctl label{font-size:.9rem;color:var(--pencil);margin-left:auto}
+.story.all .story-ctl .nav{visibility:hidden}
+
+/* plan-guided: flowchart beside picture on wide containers, step strip on narrow */
+.wbody{display:block}
+.plan-side{display:none}
+.plan-strip{display:flex;gap:4px;align-items:center;margin-bottom:.6rem;flex-wrap:wrap}
+.plan-strip span{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--rule2);display:inline-flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.85rem;color:var(--pencil)}
+.plan-strip span.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.plan-strip span.skipd{text-decoration:line-through}
+.plan-strip .stepname{font-family:var(--hand);font-size:1.1rem;color:var(--ink);margin-left:.4rem;width:auto;height:auto;border:none;justify-content:flex-start}
+@container (min-width:680px){
+  .wbody{display:grid;grid-template-columns:215px 1fr;gap:1rem}
+  .plan-side{display:block}
+  .plan-strip{display:none}
+}
+.plan-side ol{list-style:none;margin:0;padding:0;counter-reset:pl}
+.plan-side li{counter-increment:pl;padding:.35rem .5rem .35rem 2.1rem;position:relative;font-size:.9rem;color:var(--pencil);border-radius:6px;margin-bottom:3px}
+.plan-side li::before{content:counter(pl);position:absolute;left:.4rem;top:.3rem;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--rule2);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem}
+.plan-side li.on{background:var(--hl);color:var(--ink);font-weight:700}
+.plan-side li.on::before{background:var(--ink);color:#fff;border-color:var(--ink)}
+.plan-side li.skipd{text-decoration:line-through}
+.plan-side li+li::after{content:"";position:absolute;left:1.05rem;top:-4px;height:5px;border-left:1.5px solid var(--rule2)}
+
+/* ---------- reading pages ---------- */
+.page{max-width:1180px;margin:0 auto;padding:1.4rem 1.2rem 4rem;display:grid;grid-template-columns:230px minmax(0,1fr);gap:2rem}
+.toc{position:sticky;top:1rem;align-self:start;max-height:calc(100vh - 2rem);overflow:auto;font-size:.92rem;background:var(--sheet);
+  border:1.5px solid var(--ink);border-radius:var(--r-md);padding:.8rem}
+.toc a{display:block;text-decoration:none;color:var(--ink);padding:.15rem .3rem;border-radius:4px}
+.toc a:hover{background:var(--hl-soft)}
+.toc .sub{padding-left:1rem;font-size:.86rem;color:var(--pencil)}
+main.reading-main{min-width:0}
+.sheet{background:var(--sheet);border:1.5px solid var(--ink);border-radius:var(--r-md);padding:1.3rem 1.4rem;margin-bottom:1.6rem}
+.sheet>p,.sheet li{max-width:72ch}
+.idea{font-size:1.1rem;font-weight:700}
+.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.6rem 0}
+.chips a{border:1.5px solid var(--ink);border-radius:999px;padding:.1rem .7rem;text-decoration:none;color:var(--ink);font-size:.9rem;background:#fff}
+.chips a:hover{background:var(--hl)}
+.fromclass{border-left:4px solid var(--blue);background:#F1F6FE;padding:.6rem .8rem;margin:.8rem 0;font-size:.95rem}
+.fromclass b{font-family:var(--hand)}
+.traps{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;padding:0;list-style:none}
+.traps li{background:#fff;border:1.5px solid var(--ink);border-radius:var(--r-md);padding:.7rem .9rem;max-width:none}
+.traps .wrong{color:var(--red);font-weight:700;text-decoration:line-through;text-decoration-thickness:2px}
+.cheat{width:100%;border-collapse:collapse}
+.cheat td,.cheat th{border:1px solid var(--rule2);padding:.4rem .6rem;vertical-align:top;text-align:left}
+.cheat th{background:#EEF3FA}
+dl.gloss dt{font-weight:700;margin-top:.6rem}
+dl.gloss dd{margin:0 0 0 1rem;max-width:70ch}
+.site-head{display:flex;align-items:baseline;gap:1.2rem;flex-wrap:wrap;padding:1rem 1.2rem 0;max-width:1180px;margin:0 auto}
+.site-head nav a{margin-right:1rem}
+.lede{font-size:1.15rem;max-width:62ch}
+
+/* ---------- workbench ---------- */
+body.bench{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:.6rem;padding:.45rem .8rem;border-bottom:1.5px solid var(--ink);background:var(--sheet);flex-wrap:wrap}
+.topbar .brand{font-family:var(--hand);font-weight:700;font-size:1.25rem;margin-right:.4rem}
+.topbar select{font:inherit;font-size:.92rem;padding:.25rem;border:1.5px solid var(--ink);border-radius:var(--r-sm);max-width:280px}
+.topbar .meta{font-size:.9rem;color:var(--pencil);display:flex;gap:1rem;align-items:center}
+.topbar .links{margin-left:auto;display:flex;gap:.8rem;font-size:.92rem}
+.benchgrid{flex:1;min-height:0;display:grid;grid-template-columns:200px minmax(0,1fr) minmax(360px,430px)}
+.rail{border-right:1.5px solid var(--ink);overflow:auto;padding:.5rem;background:var(--paper)}
+.rail h4{font-family:var(--hand);font-size:1.05rem;margin:.6rem 0 .2rem}
+.rail button{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;border:none;background:none;padding:.25rem .4rem;border-radius:5px;font-size:.92rem;color:var(--ink)}
+.rail button:hover{background:var(--hl-soft)}
+.rail button.cur{background:var(--hl);font-weight:700}
+.sdot{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--pencil);flex:none}
+.sdot.prog{background:linear-gradient(90deg,var(--blue) 50%,#fff 50%);border-color:var(--blue)}
+.sdot.closed{background:var(--green);border-color:var(--green)}
+.middle{overflow:auto;padding:0 1rem 1rem;background:var(--paper)}
+.tabs{display:flex;gap:.2rem;position:sticky;top:0;background:var(--paper);padding-top:.5rem;z-index:2;border-bottom:1.5px solid var(--ink)}
+.tabs button{border:1.5px solid var(--ink);border-bottom:none;border-radius:7px 7px 0 0;background:#EEF3FA;padding:.3rem .9rem;margin-bottom:-1.5px;font-size:.95rem}
+.tabs button[aria-selected="true"]{background:var(--sheet);font-weight:700}
+.tabpanel{padding-top:.8rem}
+.ptext{font-size:1.08rem;background:var(--sheet);border:1.5px solid var(--ink);border-radius:var(--r-md);padding:.8rem 1rem}
+.pnote{font-size:.9rem;color:var(--pencil);margin:.5rem 0}
+.inclass{display:inline-block;font-size:.85rem;border:1px solid var(--blue);color:var(--blue);border-radius:999px;padding:0 .6rem;margin-right:.4rem}
+.above{display:inline-block;font-size:.85rem;border:1px solid var(--p3);color:var(--p3);border-radius:999px;padding:0 .6rem}
+.verified{margin-top:1rem;border:2px solid var(--green);border-radius:var(--r-md);background:#F2FAF5;padding:.8rem 1rem}
+.verified h3{color:var(--green)}
+.right{border-left:1.5px solid var(--ink);display:flex;flex-direction:column;min-height:0;background:var(--sheet)}
+.rscroll{overflow:auto;padding:.7rem .8rem;flex:1;min-height:0}
+.pills{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.5rem}
+.pills button{border:1.5px solid var(--ink);border-radius:999px;background:#fff;padding:.05rem .65rem;font-size:.88rem}
+.pills button.cur{outline:3px solid var(--hl);outline-offset:1px;font-weight:700}
+.pills button.ok{background:#DDF1E5;border-color:var(--green)}
+.pills button.handed{background:#FBE9E7;border-color:var(--red)}
+.pills button.tried{background:#EEF3FA}
+.stepq{font-weight:700;margin:.2rem 0 .5rem}
+.editor{display:flex;border:1.5px solid var(--ink);border-radius:var(--r-sm);height:140px;background:#fff;
+  background-image:linear-gradient(transparent 23px,var(--rule) 23px);background-size:100% 24px;background-position:0 6px}
+.gutter{width:2.2rem;text-align:right;padding:6px .35rem 0 0;color:var(--faint);font-size:.85rem;line-height:24px;overflow:hidden;border-right:1px solid var(--rule2);user-select:none}
+.editor textarea{flex:1;border:none;resize:none;padding:6px .5rem 0;font:inherit;font-size:.95rem;line-height:24px;background:transparent;color:var(--ink);font-family:var(--hand)}
+.editor textarea:focus{outline:none}
+.editor:focus-within{outline:3px solid var(--blue);outline-offset:1px}
+.ansrow{display:flex;gap:.4rem;margin:.6rem 0}
+.ansrow input{flex:1;font:inherit;padding:.35rem .5rem;border:1.5px solid var(--ink);border-radius:var(--r-sm);min-width:0}
+.btnrow{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem}
+.console{background:var(--console);color:var(--console-ink);font-size:.86rem;padding:.6rem .7rem;height:170px;overflow:auto;border-top:1.5px solid var(--ink);flex:none}
+.console div{margin-bottom:.3rem;line-height:1.4}
+.console .ok{color:#8BE0AC}
+.console .bad{color:#FFB3A8}
+.console .info{color:#A9C3F0}
+.console .hand{color:#FFE45E}
+.console .ts{color:#6F84AD;margin-right:.4rem}
+.dialog-back{position:fixed;inset:0;background:rgba(28,42,74,.35);display:none;align-items:center;justify-content:center;z-index:50}
+.dialog-back.open{display:flex}
+.dialog{background:var(--sheet);border:2px solid var(--ink);border-radius:var(--r-md);max-width:460px;padding:1rem 1.2rem;margin:1rem}
+.dialog h3{margin-top:0}
+.confirm-note{font-size:.88rem;color:var(--red);margin:.3rem 0}
+.rules{background:var(--sheet);border:1.5px solid var(--ink);border-radius:var(--r-md);padding:.8rem 1rem}
+.rules ol{padding-left:1.3rem;margin:.3rem 0}
+.mysteps .ms{background:var(--sheet);border:1px solid var(--rule2);border-radius:var(--r-sm);padding:.5rem .7rem;margin-bottom:.5rem}
+.mysteps pre{white-space:pre-wrap;font-family:var(--hand);margin:.3rem 0;font-size:.95rem}
+.railtoggle{display:none}
+
+/* ---------- pen ---------- */
+.pen-canvas{position:fixed;inset:0;pointer-events:none;z-index:40}
+.pen-canvas.active{pointer-events:auto;cursor:crosshair}
+.pen-canvas.active.touchpass{touch-action:pan-x pan-y pinch-zoom}
+.pen-canvas.active.swallow{touch-action:none}
+.pen-bar{position:fixed;right:12px;bottom:12px;z-index:45;background:var(--sheet);border:1.5px solid var(--ink);border-radius:var(--r-md);
+  padding:.35rem;display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;max-width:calc(100vw - 24px);box-shadow:0 2px 0 var(--ink)}
+.pen-bar button{border:1.5px solid transparent;background:none;border-radius:6px;min-width:30px;height:30px;padding:0 .35rem;font-size:.85rem;color:var(--ink)}
+.pen-bar button[aria-pressed="true"]{border-color:var(--ink);background:var(--hl)}
+.pen-bar .sw{width:20px;height:20px;border-radius:50%;display:inline-block;vertical-align:middle;border:1.5px solid var(--ink)}
+.pen-bar .tools{display:none;gap:.2rem;align-items:center;flex-wrap:wrap}
+.pen-bar.open .tools{display:flex}
+.pen-bar .sep{width:1px;height:22px;background:var(--rule2);margin:0 .15rem}
+.pen-bar .note{font-size:.75rem;color:var(--pencil);max-width:170px;line-height:1.2}
+
+/* ---------- small screens ---------- */
+@media (max-width:860px){
+  .page{grid-template-columns:1fr}
+  .toc{position:static;max-height:none}
+  body.bench{height:auto;overflow:auto}
+  .benchgrid{display:block}
+  .rail{display:none;border-right:none;border-bottom:1.5px solid var(--ink)}
+  .rail.open{display:block}
+  .railtoggle{display:inline-block}
+  .middle{overflow:visible}
+  .right{border-left:none;border-top:1.5px solid var(--ink)}
+  .console{height:150px}
+  h1{font-size:2rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{
+  .pen-bar,.pen-canvas,.story-ctl,.topbar,.rail,.right,.tabs,.toc{display:none!important}
+  .story .frame{display:block!important;page-break-inside:avoid;border-bottom:1px dashed #999;padding-bottom:.6rem;margin-bottom:.6rem}
+  body.bench{height:auto;overflow:visible}
+  .benchgrid{display:block}
+  .tabpanel[hidden]{display:block!important}
+  body.reading{background:none}
+  .page{display:block}
+}
+/* final polish */
+.story.worked:not(.all) .ftitle{display:none}
+body.bench .pen-bar{right:auto;left:12px}
+
+</style></head><body class="reading" data-penmode="page"><header class="site-head"><h1>Choose function</h1><nav aria-label="Site"><a href="choose-notes.html">Notes</a><a href="choose-lesson.html">Lesson</a><a href="choose-practice.html">Practice</a></nav></header><div class="page" style="grid-template-columns:1fr;max-width:980px"><main class="reading-main"><p class="lede">AwesomeMath Academy Level 1, week 4. A combination is a group without order: count it in order, then divide out the orders.</p><section class="sheet" id="pages" aria-labelledby="pages-h"><div class="eq" role="math">notes → lesson → practice</div><h2 id="pages-h">Three pages</h2><ul><li><a href="choose-notes.html"><b>Notes</b></a>: the reading page. Every idea as a picture story, what the teacher did in class, traps, a cheat sheet and a glossary. No grading.</li><li><a href="choose-lesson.html"><b>Lesson</b></a>: one guided problem per idea, all from class. The Concept tab is open first and teaches the idea with different numbers.</li><li><a href="choose-practice.html"><b>Practice</b></a>: all 18 problems from Problem Set 4, plus three challenge problems from class.</li></ul></section><section class="sheet" id="plan" aria-labelledby="plan-h"><div class="eq" role="math">outcomes = <span class="frac"><span>ways to build them one decision at a time</span><span>copies of each outcome</span></span></div><h2 id="plan-h">The plan</h2><p>The same seven questions work on every problem this week.</p><div class="story worked" id="story40" tabindex="0" aria-label="The plan" data-plan='[&quot;What am I making?&quot;, &quot;What is chosen, from what?&quot;, &quot;Kinds or a rule?&quot;, &quot;Swap test&quot;, &quot;Build and multiply&quot;, &quot;Built twice? Divide&quot;, &quot;Check a tiny case&quot;]'><div class="wbody"><div class="plan-side" aria-hidden="true"><ol><li data-s="1">What am I making? Write one.</li><li data-s="2">What is being chosen, and from what?</li><li data-s="3">Different kinds, or a rule? Split into cases, or start with the most restricting part.</li><li data-s="4">Swap two chosen things. Is it a new outcome?</li><li data-s="5">Build it one decision at a time. Same number of options each time? Multiply.</li><li data-s="6">Did I build any outcome more than once? Divide by the copies.</li><li data-s="7">Check a tiny case you can list.</li></ol></div><div class="wmain"><div class="plan-strip" aria-hidden="true"><span data-s="1">1</span><span data-s="2">2</span><span data-s="3">3</span><span data-s="4">4</span><span data-s="5">5</span><span data-s="6">6</span><span data-s="7">7</span><span class="stepname"></span></div><figure class="frame" data-step="1"><p class="ftitle">1. What am I making?</p><div class="pic-wrap"><svg class="pic " viewBox="0 0 256 68" role="img" aria-label="options" style="max-width:371px" preserveAspectRatio="xMidYMid meet"><rect x="6" y="6" width="44" height="26" rx="6" class="chip picked"/><text x="28.0" y="24.0" class="chiptxt picked" text-anchor="middle">Ana</text><rect x="56" y="6" width="44" height="26" rx="6" class="chip"/><text x="78.0" y="24.0" class="chiptxt " text-anchor="middle">Ben</text><rect x="106" y="6" width="44" height="26" rx="6" class="chip picked"/><text x="128.0" y="24.0" class="chiptxt picked" text-anchor="middle">Cal</text><rect x="156" y="6" width="44" height="26" rx="6" class="chip"/><text x="178.0" y="24.0" class="chiptxt " text-anchor="middle">Dev</text><rect x="206" y="6" width="44" height="26" rx="6" class="chip picked"/><text x="228.0" y="24.0" class="chiptxt picked" text-anchor="middle">Eli</text><text x="128.0" y="62" class="cap" text-anchor="middle">one sleepover</text></svg></div><figcaption><p>Pick 3 of 5 friends for a sleepover. One example: Ana, Cal, Eli.</p></figcaption></figure><figure class="frame" data-step="2"><p class="ftitle">2. What is chosen, from what?</p><div class="pic-wrap"><svg class="pic " viewBox="0 0 256 68" role="img" aria-label="options" style="max-width:371px" preserveAspectRatio="xMidYMid meet"><rect x="6" y="6" width="44" height="26" rx="6" class="chip"/><text x="28.0" y="24.0" class="chiptxt " text-anchor="middle">Ana</text><rect x="56" y="6" width="44" height="26" rx="6" class="chip"/><text x="78.0" y="24.0" class="chiptxt " text-anchor="middle">Ben</text><rect x="106" y="6" width="44" height="26" rx="6" class="chip"/><text x="128.0" y="24.0" class="chiptxt " text-anchor="middle">Cal</text><rect x="156" y="6" width="44" height="26" rx="6" class="chip"/><text x="178.0" y="24.0" class="chiptxt " text-anchor="middle">Dev</text><rect x="206" y="6" width="44" height="26" rx="6" class="chip"/><text x="228.0" y="24.0" class="chiptxt " text-anchor="middle">Eli</text><text x="128.0" y="62" class="cap" text-anchor="middle">3 people chosen from 5</text></svg></div><figcaption><p>What is chosen? 3 people. From what? 5 friends.</p></figcaption></figure><figure class="frame skip" data-step="3"><p class="ftitle">3. Kinds or a rule?</p><div class="pic-wrap"><svg class="pic " viewBox="0 0 260 56" role="img" aria-label="step not needed: one kind of sleepover, and every friend is allowed" style="max-width:377px" preserveAspectRatio="xMidYMid meet"><rect x="4" y="4" width="252" height="48" rx="10" class="wcard skip"/><text x="130.0" y="32" class="cardt" text-anchor="middle">not needed here</text></svg></div><figcaption><p>Not needed here: one kind of sleepover, and every friend is allowed</p></figcaption></figure><figure class="frame" data-step="4"><p class="ftitle">4. Swap test</p><div class="pic-wrap"><svg class="pic " viewBox="0 0 323 78" role="img" aria-label="swap test" style="max-width:468px" preserveAspectRatio="xMidYMid meet"><rect x="4" y="4" width="315" height="48" rx="10" class="wcard "/><text x="161.5" y="32" class="cardt" text-anchor="middle">Ana, Cal, Eli   =   Cal, Ana, Eli</text><text x="161.5" y="72" class="cap" text-anchor="middle">same sleepover</text></svg></div><figcaption><p>Swap Ana and Cal: same sleepover. Order doesn&#x27;t matter, so it&#x27;s a group.</p><div class="ask"><b>Ask him:</b> If the three were 1st, 2nd and 3rd prize winners, would the swap matter?</div></figcaption></figure><figure class="frame" data-step="5"><p class="ftitle">5. Build and multiply</p><div class="pic-wrap"><svg class="pic " viewBox="0 0 416 134" role="img" aria-label="slots" style="max-width:603px" preserveAspectRatio="xMidYMid meet"><text x="47.0" y="20" class="slotlab" text-anchor="middle">1st</text><rect x="10" y="28" width="74" height="50" rx="8" class="slot "/><text x="47.0" y="63" class="slotn" text-anchor="middle">5</text><text x="99.0" y="62" class="op" text-anchor="middle">×</text><text x="151.0" y="20" class="slotlab" text-anchor="middle">2nd</text><rect x="114" y="28" width="74" height="50" rx="8" class="slot "/><text x="151.0" y="63" class="slotn" text-anchor="middle">4</text><text x="203.0" y="62" class="op" text-anchor="middle">×</text><text x="255.0" y="20" class="slotlab" text-anchor="middle">3rd</text><rect x="218" y="28" width="74" height="50" rx="8" class="slot "/><text x="255.0" y="63" class="slotn" text-anchor="middle">3</text><text x="307.0" y="62" class="op" text-anchor="middle">=</text><rect x="322" y="28" width="84" height="50" rx="8" class="result"/><text x="364.0" y="63" class="slotn" text-anchor="middle">60</text><text x="208.0" y="128" class="cap" text-anchor="middle">always 4 left after the first pick, whoever it was</text></svg></div><figcaption><p>Count as if they&#x27;re invited one at a time: 5 × 4 × 3 = 60. Whoever goes first, 4 remain, so the counts stay equal and we multiply.</p></figcaption></figure><figure class="frame" data-step="6"><p class="ftitle">6. Built twice? Divide</p><div class="pic-wrap"><svg class="pic " viewBox="0 0 364 110" role="img" aria-label="bundle" style="max-width:528px" preserveAspectRatio="xMidYMid meet"><rect x="10" y="12" width="82" height="24" rx="5" class="card"/><rect x="15" y="15" width="22" height="18" rx="6" class="chip  p1"/><text x="26.0" y="29.0" class="chiptxt " text-anchor="middle">A</text><rect x="39" y="15" width="22" height="18" rx="6" class="chip  p2"/><text x="50.0" y="29.0" class="chiptxt " text-anchor="middle">C</text><rect x="63" y="15" width="22" height="18" rx="6" class="chip  p3"/><text x="74.0" y="29.0" class="chiptxt " text-anchor="middle">E</text><rect x="10" y="42" width="82" height="24" rx="5" class="card"/><rect x="15" y="45" width="22" height="18" rx="6" class="chip  p1"/><text x="26.0" y="59.0" class="chiptxt " text-anchor="middle">A</text><rect x="39" y="45" width="22" height="18" rx="6" class="chip  p3"/><text x="50.0" y="59.0" class="chiptxt " text-anchor="middle">E</text><rect x="63" y="45" width="22" height="18" rx="6" class="chip  p2"/><text x="74.0" y="59.0" class="chiptxt " text-anchor="middle">C</text><rect x="10" y="72" width="82" height="24" rx="5" class="card"/><rect x="15" y="75" width="22" height="18" rx="6" class="chip  p2"/><text x="26.0" y="89.0" class="chiptxt " text-anchor="middle">C</text><rect x="39" y="75" width="22" height="18" rx="6" class="chip  p1"/><text x="50.0" y="89.0" class="chiptxt " text-anchor="middle">A</text><rect x="63" y="75" width="22" height="18" rx="6" class="chip  p3"/><text x="74.0" y="89.0" class="chiptxt " text-anchor="middle">E</text><rect x="102" y="12" width="82" height="24" rx="5" class="card"/><rect x="107" y="15" width="22" height="18" rx="6" class="chip  p2"/><text x="118.0" y="29.0" class="chiptxt " text-anchor="middle">C</text><rect x="131" y="15" width="22" height="18" rx="6" class="chip  p3"/><text x="142.0" y="29.0" class="chiptxt " text-anchor="middle">E</text><rect x="155" y="15" width="22" height="18" rx="6" class="chip  p1"/><text x="166.0" y="29.0" class="chiptxt " text-anchor="middle">A</text><rect x="102" y="42" width="82" height="24" rx="5" class="card"/><rect x="107" y="45" width="22" height="18" rx="6" class="chip  p3"/><text x="118.0" y="59.0" class="chiptxt " text-anchor="middle">E</text><rect x="131" y="45" width="22" height="18" rx="6" class="chip  p1"/><text x="142.0" y="59.0" class="chiptxt " text-anchor="middle">A</text><rect x="155" y="45" width="22" height="18" rx="6" class="chip  p2"/><text x="166.0" y="59.0" class="chiptxt " text-anchor="middle">C</text><rect x="102" y="72" width="82" height="24" rx="5" class="card"/><rect x="107" y="75" width="22" height="18" rx="6" class="chip  p3"/><text x="118.0" y="89.0" class="chiptxt " text-anchor="middle">E</text><rect x="131" y="75" width="22" height="18" rx="6" class="chip  p2"/><text x="142.0" y="89.0" class="chiptxt " text-anchor="middle">C</text><rect x="155" y="75" width="22" height="18" rx="6" class="chip  p1"/><text x="166.0" y="89.0" class="chiptxt " text-anchor="middle">A</text><path d="M198 55.0 L222 55.0" class="arrow" marker-end="url(#ah9)"/><defs><marker id="ah9" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" class="ahead"/></marker></defs><rect x="228" y="25.0" width="120" height="60" rx="14" class="groupbox"/><text x="288.0" y="19.0" class="cap" text-anchor="middle">one group</text><text x="288.0" y="62.0" class="groupt" text-anchor="middle">{ A, C, E }</text><text x="288.0" y="103.0" class="cap" text-anchor="middle">6 lists → 1</text></svg></div><figcaption><p>Built twice? Yes. Each sleepover was built 3 × 2 × 1 = 6 times.</p></figcaption></figure><figure class="frame" data-step="6"><p class="ftitle">6. Built twice? Divide</p><div class="pic-wrap"><svg class="pic " viewBox="0 0 241 70" role="img" aria-label="divide" style="max-width:349px" preserveAspectRatio="xMidYMid meet"><rect x="10" y="16" width="44" height="40" rx="7" class="numbox"/><text x="32.0" y="43" class="calcn" text-anchor="middle">60</text><text x="77.5" y="44" class="op" text-anchor="middle">÷</text><rect x="101" y="16" width="31" height="40" rx="7" class="numbox"/><text x="116.5" y="43" class="calcn" text-anchor="middle">6</text><text x="155.5" y="44" class="op" text-anchor="middle">=</text><rect x="179" y="16" width="44" height="40" rx="7" class="result"/><text x="201.0" y="43" class="calcn" text-anchor="middle">10</text></svg></div><figcaption><p>Divide by the copies: 60 ÷ 6 = 10.</p></figcaption></figure><figure class="frame" data-step="7"><p class="ftitle">7. Check a tiny case</p><div class="pic-wrap"><svg class="pic " viewBox="0 0 222 64" role="img" aria-label="list" style="max-width:322px" preserveAspectRatio="xMidYMid meet"><rect x="8" y="6" width="46" height="24" rx="5" class="lcell"/><text x="31.0" y="23" class="lt" text-anchor="middle">ABC</text><rect x="60" y="6" width="46" height="24" rx="5" class="lcell"/><text x="83.0" y="23" class="lt" text-anchor="middle">ABD</text><rect x="112" y="6" width="46" height="24" rx="5" class="lcell"/><text x="135.0" y="23" class="lt" text-anchor="middle">ACD</text><rect x="164" y="6" width="46" height="24" rx="5" class="lcell"/><text x="187.0" y="23" class="lt" text-anchor="middle">BCD</text><text x="111.0" y="58" class="cap" text-anchor="middle">4 × 3 × 2 = 24, ÷ 6 = 4</text></svg></div><figcaption><p>Tiny case: 3 of 4 friends. The rule says 24 ÷ 6 = 4, and the list has exactly 4.</p></figcaption></figure></div></div><div class="story-ctl"><span class="nav"><button type="button" class="btn" data-act="back">← Back</button> <button type="button" class="btn primary" data-act="next">Next step →</button></span><span class="dots" role="group" aria-label="Pictures"></span><label><input type="checkbox" class="showall"> Show all steps</label></div></div></section><section class="sheet" id="grading" aria-labelledby="grading-h"><div class="eq" role="math">a closed step = your method + the right number</div><h2 id="grading-h">How grading works</h2><p>Each problem is split into steps, one number per step. He writes his method in the lined box and types the number (or an expression like <i>12 choose 4</i> or <i>2^6 × 11</i>), then presses <b>Check step</b> (<kbd>Enter</kbd> in the answer box, <kbd>Ctrl</kbd>+<kbd>Enter</kbd> in the working box).</p><p>A wrong answer gets a nudge, and the nudges get more specific each time. After three misses he gets one final attempt; if that misses too, the step's answer is handed over and he does the next step himself. <b>Hint for this step</b> opens a hint without using a try (it's noted in My steps). <b>Submit question</b> reports how each step went and opens the verified answer and a step-by-step picture story once every step is closed. <b>Show worked answer</b> asks twice if some steps haven't been tried.</p><p>Nothing is saved when the tab closes: progress and ink start fresh each visit.</p></section><section class="sheet" id="pen" aria-labelledby="pen-h"><div class="eq" role="math">P = pen on/off , Esc = pen off</div><h2 id="pen-h">The teaching pen</h2><p>Press <kbd>P</kbd> (or the ✎ button, bottom right) to write on any page. Four inks, three nibs, a highlighter, straight lines, boxes and an eraser; hold <kbd>Shift</kbd> for a straight stroke. <b>Stylus only</b> ignores your palm. On the notes page the ink stays with the text as you scroll and a finger scrolls; on the workbenches the ink stays with each problem. <b>PNG</b> saves the ink only, not the page underneath.</p></section></main></div>
+<script>
+/* Sandbox-safe helpers: no storage, no alert/confirm/prompt; hash and history guarded. */
+window.SAFE = (function () {
+  "use strict";
+  function isAbout() { try { return location.protocol === "about:" || location.href === "about:srcdoc"; } catch (e) { return true; } }
+  function getHash() { if (isAbout()) return ""; try { return decodeURIComponent((location.hash || "").slice(1)); } catch (e) { return ""; } }
+  function setHash(h) {
+    if (isAbout()) return false;
+    try { history.replaceState(null, "", "#" + h); return true; }
+    catch (e) { try { location.hash = h; return true; } catch (e2) { return false; } }
+  }
+  return { isAbout, getHash, setHash };
+})();
+
+</script>
+<script>
+/* Step-through story: one picture per frame, Back/Next, progress dots, Show all, ←/→ when focused. */
+window.STORY = (function () {
+  "use strict";
+  function setup(st) {
+    if (st.dataset.ready) return;
+    st.dataset.ready = "1";
+    const frames = Array.from(st.querySelectorAll(":scope .frame"));
+    const dots = st.querySelector(".dots"), back = st.querySelector("[data-act=back]"), next = st.querySelector("[data-act=next]");
+    const all = st.querySelector("input.showall"), name = st.querySelector(".stepname");
+    const marks = Array.from(st.querySelectorAll(".plan-side li[data-s], .plan-strip span[data-s]"));
+    const skipped = new Set(frames.filter((f) => f.classList.contains("skip")).map((f) => f.dataset.step));
+    marks.forEach((m) => m.classList.toggle("skipd", skipped.has(m.dataset.s)));
+    let i = 0;
+    const seen = new Set([0]);
+    frames.forEach((f, k) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-label", "Picture " + (k + 1) + " of " + frames.length);
+      b.addEventListener("click", () => go(k));
+      dots.appendChild(b);
+    });
+    function go(k) { i = Math.max(0, Math.min(frames.length - 1, k)); seen.add(i); render(); }
+    function render() {
+      frames.forEach((f, k) => f.classList.toggle("on", k === i));
+      Array.from(dots.children).forEach((b, k) => { b.classList.toggle("on", k === i); b.classList.toggle("seen", seen.has(k) && k !== i); });
+      back.disabled = i === 0;
+      next.disabled = i === frames.length - 1;
+      const s = frames[i] && frames[i].dataset.step;
+      marks.forEach((m) => m.classList.toggle("on", s && m.dataset.s === s));
+      if (name) name.textContent = s && st.dataset.plan ? JSON.parse(st.dataset.plan)[+s - 1] : "";
+    }
+    back.addEventListener("click", () => go(i - 1));
+    next.addEventListener("click", () => go(i + 1));
+    st.addEventListener("keydown", (e) => {
+      if (e.target.closest("input,textarea,select")) return;
+      if (e.key === "ArrowRight") { go(i + 1); e.preventDefault(); }
+      else if (e.key === "ArrowLeft") { go(i - 1); e.preventDefault(); }
+    });
+    all.addEventListener("change", () => st.classList.toggle("all", all.checked));
+    st._go = go;
+    render();
+  }
+  function init(root) { (root || document).querySelectorAll(".story").forEach(setup); }
+  document.addEventListener("DOMContentLoaded", () => init());
+  return { init };
+})();
+
+</script>
+<script>
+/* Pick grid: pointing at (or focusing) a box lights its twin, unless the grid is plain (no twins). */
+(function () {
+  "use strict";
+  function twin(cell) {
+    const svg = cell.closest("svg");
+    if (!svg || svg.classList.contains("plain")) return null;
+    const r = cell.getAttribute("data-r"), c = cell.getAttribute("data-c");
+    if (r === c) return null;
+    return svg.querySelector('.pg-cell[data-r="' + c + '"][data-c="' + r + '"]');
+  }
+  function on(e) { const c = e.target.closest && e.target.closest(".pg-cell"); if (!c) return; const t = twin(c); if (t) { t.classList.add("twin-lit"); c.classList.add("twin-lit"); } }
+  function off(e) { const c = e.target.closest && e.target.closest(".pg-cell"); if (!c) return; const t = twin(c); if (t) { t.classList.remove("twin-lit"); c.classList.remove("twin-lit"); } }
+  document.addEventListener("pointerover", on);
+  document.addEventListener("pointerout", off);
+  document.addEventListener("focusin", on);
+  document.addEventListener("focusout", off);
+})();
+
+</script>
+<script>
+/* Teaching pen.
+   Two viewport-sized canvases: `base` holds committed strokes, `live` holds only the stroke being drawn.
+   While drawing, only the newest segments are painted; old strokes are never redrawn.
+   Reading pages (data-penmode="page"): strokes are stored in page coordinates and stay on the content; a finger scrolls.
+   Workbench pages (data-penmode="viewport"): strokes are viewport-anchored, the pen layer swallows scrolling,
+   and ink is kept per problem through window.INK.get/set. */
+(function () {
+  "use strict";
+  const MODE = document.body.dataset.penmode === "viewport" ? "viewport" : "page";
+  const DPR = Math.min(2, window.devicePixelRatio || 1);
+  const COLORS = [["ink", "#1C2A4A"], ["red", "#C23A2E"], ["blue", "#2D6BD0"], ["green", "#1E7A50"]];
+  const WIDTHS = [2, 3.5, 6];
+  const stats = { framesDrawing: 0, oldRedrawsWhileDrawing: 0, baseRedraws: 0, segmentsPainted: 0 };
+  window.__PEN = { stats, mode: MODE, megapixels: () => 2 * (base.width * base.height) / 1e6, strokes: () => strokes };
+
+  const base = document.createElement("canvas"), live = document.createElement("canvas");
+  base.className = "pen-canvas base"; live.className = "pen-canvas live";
+  base.setAttribute("aria-hidden", "true"); live.setAttribute("aria-hidden", "true");
+  const bctx = base.getContext("2d"), lctx = live.getContext("2d");
+  let strokes = [], undoStack = [], redoStack = [];
+  let on = false, tool = "pen", color = COLORS[0][1], widthIdx = 1, stylusOnly = false;
+  let drawing = null, raf = 0, scrollRaf = 0;
+
+  function off() { return MODE === "page" ? [window.scrollX, window.scrollY] : [0, 0]; }
+  function size() {
+    for (const c of [base, live]) {
+      c.width = Math.round(window.innerWidth * DPR);
+      c.height = Math.round(window.innerHeight * DPR);
+      c.style.width = window.innerWidth + "px";
+      c.style.height = window.innerHeight + "px";
+      c.getContext("2d").setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    redrawBase();
+  }
+
+  /* ---- drawing primitives ---- */
+  function style(ctx, s) {
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.strokeStyle = s.color;
+    ctx.globalAlpha = s.tool === "marker" ? 0.32 : 1;
+  }
+  function seg(ctx, s, k, ox, oy) {
+    // smoothed segment k: from mid(k-2,k-1) to mid(k-1,k) with control point k-1
+    const p = s.pts;
+    const a = p[k - 2] || p[k - 1], b = p[k - 1], c = p[k];
+    const m1x = (a[0] + b[0]) / 2 - ox, m1y = (a[1] + b[1]) / 2 - oy, m2x = (b[0] + c[0]) / 2 - ox, m2y = (b[1] + c[1]) / 2 - oy;
+    ctx.lineWidth = b[2];
+    ctx.beginPath(); ctx.moveTo(m1x, m1y); ctx.quadraticCurveTo(b[0] - ox, b[1] - oy, m2x, m2y); ctx.stroke();
+    stats.segmentsPainted++;
+  }
+  function drawShape(ctx, s, ox, oy) {
+    style(ctx, s);
+    if (s.tool === "line" || s.snapped) {
+      const a = s.pts[0], b = s.pts[s.pts.length - 1];
+      ctx.lineWidth = s.w; ctx.beginPath(); ctx.moveTo(a[0] - ox, a[1] - oy); ctx.lineTo(b[0] - ox, b[1] - oy); ctx.stroke();
+    } else if (s.tool === "box") {
+      const a = s.pts[0], b = s.pts[s.pts.length - 1];
+      ctx.lineWidth = s.w; ctx.strokeRect(Math.min(a[0], b[0]) - ox, Math.min(a[1], b[1]) - oy, Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]));
+    } else if (s.tool === "marker") {
+      // translucent: draw as one path so overlaps inside the stroke don't darken
+      ctx.lineWidth = s.w; ctx.beginPath();
+      const p = s.pts; ctx.moveTo(p[0][0] - ox, p[0][1] - oy);
+      for (let k = 1; k < p.length; k++) { const mx = (p[k - 1][0] + p[k][0]) / 2 - ox, my = (p[k - 1][1] + p[k][1]) / 2 - oy; ctx.quadraticCurveTo(p[k - 1][0] - ox, p[k - 1][1] - oy, mx, my); }
+      ctx.stroke();
+    } else {
+      if (s.pts.length === 1) { ctx.lineWidth = s.pts[0][2]; ctx.beginPath(); ctx.arc(s.pts[0][0] - ox, s.pts[0][1] - oy, s.pts[0][2] / 2, 0, 7); ctx.fillStyle = s.color; ctx.fill(); }
+      for (let k = 1; k < s.pts.length; k++) seg(ctx, s, k, ox, oy);
+    }
+    ctx.globalAlpha = 1;
+  }
+  function redrawBase() {
+    if (drawing) stats.oldRedrawsWhileDrawing++;
+    stats.baseRedraws++;
+    bctx.clearRect(0, 0, base.width, base.height);
+    const [ox, oy] = off();
+    for (const s of strokes) drawShape(bctx, s, ox, oy);
+  }
+
+  /* ---- pointer handling ---- */
+  function accept(e) {
+    if (!on) return false;
+    if (e.pointerType === "touch" && (stylusOnly || MODE === "page")) return false; // palm rejection / finger scrolls
+    return true;
+  }
+  function pt(e, prev) {
+    const [ox, oy] = off();
+    const x = e.clientX + ox, y = e.clientY + oy, t = e.timeStamp || performance.now();
+    const baseW = WIDTHS[widthIdx] * (tool === "marker" ? 4 : 1);
+    let w = baseW;
+    if (prev && tool === "pen") {
+      const dt = Math.max(1, t - prev[3]), v = Math.hypot(x - prev[0], y - prev[1]) / dt;
+      const target = baseW * Math.max(0.45, Math.min(1.25, 1.25 - v * 0.35));
+      w = prev[2] * 0.7 + target * 0.3;
+    }
+    return [x, y, w, t];
+  }
+  function down(e) {
+    if (!accept(e)) return;
+    e.preventDefault();
+    try { live.setPointerCapture(e.pointerId); } catch (_) {}
+    if (tool === "eraser") { drawing = { tool: "eraser", removed: [] }; eraseAt(e); return; }
+    const p = pt(e, null);
+    drawing = { tool, color, w: WIDTHS[widthIdx] * (tool === "marker" ? 4 : 1), pts: [p], drawn: 1, snapped: false };
+    schedule();
+  }
+  function move(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    if (drawing.tool === "eraser") { eraseAt(e); return; }
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for (const ev of evs.length ? evs : [e]) drawing.pts.push(pt(ev, drawing.pts[drawing.pts.length - 1]));
+    drawing.snapped = (drawing.tool === "pen" || drawing.tool === "marker") && e.shiftKey;
+    schedule();
+  }
+  function up(e) {
+    if (!drawing) return;
+    if (drawing.tool === "eraser") {
+      if (drawing.removed.length) { undoStack.push({ type: "erase", items: drawing.removed }); redoStack = []; }
+      drawing = null; persist(); return;
+    }
+    cancelAnimationFrame(raf); raf = 0;
+    const s = drawing; drawing = null;
+    delete s.drawn;
+    if ((s.tool === "line" || s.tool === "box" || s.snapped) && s.pts.length > 1) s.pts = [s.pts[0], s.pts[s.pts.length - 1]];
+    strokes.push(s);
+    undoStack.push({ type: "add", stroke: s }); redoStack = [];
+    lctx.clearRect(0, 0, live.width, live.height);
+    const [ox, oy] = off();
+    drawShape(bctx, s, ox, oy);           // commit: paint only the new stroke onto the base layer
+    persist();
+  }
+  function schedule() { if (!raf) raf = requestAnimationFrame(frame); }
+  function frame() {
+    raf = 0;
+    if (!drawing) return;
+    stats.framesDrawing++;
+    const s = drawing, [ox, oy] = off();
+    if (s.tool === "pen" && !s.snapped) {
+      style(lctx, s);
+      for (let k = Math.max(1, s.drawn); k < s.pts.length; k++) seg(lctx, s, k, ox, oy);   // only new points
+      s.drawn = s.pts.length;
+    } else {
+      // marker, line, box, shift-snapped: the live layer shows just this one shape
+      lctx.clearRect(0, 0, live.width, live.height);
+      drawShape(lctx, s, ox, oy);
+      if (s.tool === "pen") s.drawn = 1;
+    }
+  }
+  function eraseAt(e) {
+    const [ox, oy] = off();
+    const x = e.clientX + ox, y = e.clientY + oy;
+    let hit = false;
+    for (let i = strokes.length - 1; i >= 0; i--) {
+      const s = strokes[i];
+      const near = s.pts.some((p) => Math.hypot(p[0] - x, p[1] - y) < 12) ||
+        ((s.tool === "line" || s.tool === "box" || s.snapped) && nearShape(s, x, y));
+      if (near) { drawing.removed.push({ stroke: s, index: i }); strokes.splice(i, 1); hit = true; }
+    }
+    if (hit) { const d = drawing; drawing = null; redrawBase(); drawing = d; }
+  }
+  function nearShape(s, x, y) {
+    const a = s.pts[0], b = s.pts[s.pts.length - 1];
+    const segs = s.tool === "box" ? [[a[0], a[1], b[0], a[1]], [b[0], a[1], b[0], b[1]], [b[0], b[1], a[0], b[1]], [a[0], b[1], a[0], a[1]]] : [[a[0], a[1], b[0], b[1]]];
+    return segs.some(([x1, y1, x2, y2]) => {
+      const L = Math.hypot(x2 - x1, y2 - y1) || 1, t = Math.max(0, Math.min(1, ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / (L * L)));
+      return Math.hypot(x - (x1 + t * (x2 - x1)), y - (y1 + t * (y2 - y1))) < 10;
+    });
+  }
+
+  /* ---- history ---- */
+  function undo() {
+    const a = undoStack.pop(); if (!a) return;
+    if (a.type === "add") strokes.splice(strokes.lastIndexOf(a.stroke), 1);
+    else if (a.type === "erase") a.items.slice().reverse().forEach((it) => strokes.splice(it.index, 0, it.stroke));
+    else if (a.type === "clear") strokes = a.items.slice();
+    redoStack.push(a); redrawBase(); persist();
+  }
+  function redo() {
+    const a = redoStack.pop(); if (!a) return;
+    if (a.type === "add") strokes.push(a.stroke);
+    else if (a.type === "erase") a.items.forEach((it) => { const i = strokes.indexOf(it.stroke); if (i >= 0) strokes.splice(i, 1); });
+    else if (a.type === "clear") strokes = [];
+    undoStack.push(a); redrawBase(); persist();
+  }
+  function clearAll() {
+    if (!strokes.length) return;
+    undoStack.push({ type: "clear", items: strokes.slice() }); redoStack = [];
+    strokes = []; redrawBase(); persist();
+  }
+  function exportPng() {
+    try {
+      const a = document.createElement("a");
+      a.href = base.toDataURL("image/png");
+      a.download = "ink.png";
+      document.body.appendChild(a); a.click(); a.remove();
+      note("Saved the ink only (not the page underneath).");
+    } catch (err) { note("Export isn't allowed here."); }
+  }
+
+  /* ---- per-problem ink (workbench) ---- */
+  let problemId = null;
+  function persist() { if (MODE === "viewport" && problemId && window.INK) window.INK.set(problemId, strokes.slice()); }
+  document.addEventListener("bench:problem", (e) => {
+    if (MODE !== "viewport") return;
+    if (e.detail.from && window.INK) window.INK.set(e.detail.from, strokes.slice());
+    problemId = e.detail.to;
+    strokes = window.INK ? window.INK.get(problemId).slice() : [];
+    undoStack = []; redoStack = [];
+    redrawBase();
+  });
+
+  /* ---- toolbar ---- */
+  const bar = document.createElement("div");
+  bar.className = "pen-bar"; bar.setAttribute("role", "toolbar"); bar.setAttribute("aria-label", "Teaching pen");
+  const btn = (label, title, fn, pressed) => {
+    const b = document.createElement("button"); b.type = "button"; b.innerHTML = label; b.title = title; b.setAttribute("aria-label", title);
+    if (pressed !== undefined) b.setAttribute("aria-pressed", String(pressed));
+    b.addEventListener("click", fn); return b;
+  };
+  const toggle = btn("✎ Pen", "Pen on/off (P)", () => setOn(!on), false);
+  const tools = document.createElement("div"); tools.className = "tools";
+  const toolBtns = {};
+  [["pen", "✎", "Pen"], ["marker", "▬", "Marker"], ["line", "╱", "Straight line"], ["box", "▭", "Box"], ["eraser", "⌫", "Eraser"]].forEach(([k, g, t]) => {
+    toolBtns[k] = btn(g, t, () => setTool(k), k === tool); tools.appendChild(toolBtns[k]);
+  });
+  tools.appendChild(Object.assign(document.createElement("span"), { className: "sep" }));
+  const colBtns = COLORS.map(([n, c], i) => { const b = btn('<span class="sw" style="background:' + c + '"></span>', n + " ink", () => setColor(i), i === 0); tools.appendChild(b); return b; });
+  tools.appendChild(Object.assign(document.createElement("span"), { className: "sep" }));
+  const wBtns = WIDTHS.map((w, i) => { const b = btn(["thin", "medium", "thick"][i][0].toUpperCase(), ["Thin", "Medium", "Thick"][i] + " nib", () => setWidth(i), i === widthIdx); tools.appendChild(b); return b; });
+  tools.appendChild(Object.assign(document.createElement("span"), { className: "sep" }));
+  tools.appendChild(btn("↶", "Undo", undo)); tools.appendChild(btn("↷", "Redo", redo)); tools.appendChild(btn("Clear", "Clear all ink (undoable)", clearAll));
+  tools.appendChild(btn("PNG", "Export the ink only as a PNG image (not the page)", exportPng));
+  const stylusBtn = btn("Stylus only", "Ignore finger touches (palm rejection)", () => { stylusOnly = !stylusOnly; stylusBtn.setAttribute("aria-pressed", String(stylusOnly)); }, false);
+  tools.appendChild(stylusBtn);
+  const noteEl = document.createElement("span"); noteEl.className = "note"; noteEl.setAttribute("aria-live", "polite");
+  tools.appendChild(noteEl);
+  bar.appendChild(toggle); bar.appendChild(tools);
+  function note(t) { noteEl.textContent = t; }
+  function setOn(v) {
+    on = v;
+    toggle.setAttribute("aria-pressed", String(on));
+    bar.classList.toggle("open", on);
+    live.classList.toggle("active", on);
+    live.classList.toggle(MODE === "page" ? "touchpass" : "swallow", on);
+    note(on ? (MODE === "page" ? "Ink stays on the page; a finger scrolls." : "Ink stays with this problem.") : "");
+  }
+  function setTool(k) { tool = k; Object.entries(toolBtns).forEach(([n, b]) => b.setAttribute("aria-pressed", String(n === k))); }
+  function setColor(i) { color = COLORS[i][1]; colBtns.forEach((b, j) => b.setAttribute("aria-pressed", String(i === j))); }
+  function setWidth(i) { widthIdx = i; wBtns.forEach((b, j) => b.setAttribute("aria-pressed", String(i === j))); }
+
+  /* ---- wiring ---- */
+  function typing(e) { const t = e.target; return !!(t && t.closest && t.closest("input,textarea,select,[contenteditable=true]")); }
+  document.addEventListener("keydown", (e) => {
+    if (typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === "p" || e.key === "P") { setOn(!on); e.preventDefault(); }
+    else if (e.key === "Escape" && on) setOn(false);
+  });
+  live.addEventListener("pointerdown", down);
+  live.addEventListener("pointermove", move);
+  live.addEventListener("pointerup", up);
+  live.addEventListener("pointercancel", up);
+  if (MODE === "page") {
+    window.addEventListener("scroll", () => { if (!scrollRaf) scrollRaf = requestAnimationFrame(() => { scrollRaf = 0; redrawBase(); }); }, { passive: true });
+    // wheel over the active pen layer still scrolls the page
+    live.addEventListener("wheel", (e) => { window.scrollBy(e.deltaX, e.deltaY); }, { passive: true });
+  } else {
+    live.addEventListener("wheel", (e) => { if (on) e.preventDefault(); }, { passive: false });
+  }
+  window.addEventListener("resize", size);
+  document.addEventListener("DOMContentLoaded", () => {
+    document.body.appendChild(base); document.body.appendChild(live); document.body.appendChild(bar);
+    size();
+  });
+  window.PEN = { setOn, setTool, setColor, setWidth, undo, redo, clearAll, exportPng, isOn: () => on, setStylusOnly: (v) => { stylusOnly = v; stylusBtn.setAttribute("aria-pressed", String(v)); } };
+})();
+
+</script>
+</body></html>
